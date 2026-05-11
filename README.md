@@ -33,7 +33,7 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 - **LVGL UI** — Dark-themed interface with animated screen transitions
 - **OTA Updates** — Custom web UI at `http://<IP>/update` showing device info, firmware version, and partition status
 - **Dual OTA Partitions** — app0/app1 alternating, with automatic rollback protection
-- **Network Multiplayer** — Works over WiFi (UDP) or ESP-NOW (no WiFi needed), invite/accept lobby system
+- **Network Multiplayer** — Works over WiFi (UDP) or ESP-NOW (no WiFi needed), invite/accept lobby system, heartbeat + move-counter resync auto-heals dropped moves in turn-based games
 - **ESP-NOW** — Peer-to-peer multiplayer without WiFi infrastructure, automatic fallback when WiFi is unavailable
 - **NTP Clock** — Current date/time (Pacific) displayed on the main menu when WiFi is connected
 - **Sound Effects** — Piezo buzzer feedback for moves, opponent moves, wins, losses, and startup
