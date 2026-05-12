@@ -20,7 +20,7 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 | Connect 4 | 1-2P | Yes | vs CPU, local, or network, 4-direction win check |
 | Memory Match | 1-2P | Yes | Card matching with 6 pairs, solo/local/network |
 | Checkers | 1-2P | Yes | vs CPU, full rules with kings and forced jumps |
-| Chess | 1-2P | Yes | vs CPU, Unicode piece symbols, full rules |
+| Chess | 1-2P | Yes | vs CPU, Unicode piece symbols, full rules, board auto-flips so your pieces are always closest in network games |
 | Anagram | 1P | - | Unscramble words, 20s timer, 10 rounds, 80+ words |
 | Dots & Boxes | 2P | Yes | Claim boxes by completing lines |
 | Whack-a-Mole | 1P | - | Whack brown moles, spare baby faces, POW effects, 30s |

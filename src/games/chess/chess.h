@@ -40,6 +40,7 @@ private:
     Mode mode_ = MODE_SELECT;
     bool my_turn_ = true;
     bool game_done_ = false;
+    bool flipped_ = false;
     IPAddress peer_ip_;
 
     // Castling rights
@@ -64,6 +65,7 @@ private:
     bool is_white(int idx) { return board_[idx] > 0; }
     bool is_black(int idx) { return board_[idx] < 0; }
     int abs_piece(int idx) { return board_[idx] < 0 ? -board_[idx] : board_[idx]; }
+    int vidx(int idx) const { return flipped_ ? 63 - idx : idx; }
 
     bool is_valid_move(int from, int to, bool check_check = true);
     bool is_in_check(bool white);
