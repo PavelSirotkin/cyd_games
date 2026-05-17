@@ -44,7 +44,7 @@ The diagram below is the **back** of the CYD — the side with the ESP32 module,
    external power               CYD rear pads
    ┌──────────────┐
    │              │
-   │   +5V  ●─────┼────────────►  S1   (V+, ~5 V rail to USB)
+   │   V+   ●─────┼────────────►  S1   (V+ rail)
    │              │
    │   GND  ●─────┼────────────►  S3   (GND)
    │              │
@@ -56,9 +56,34 @@ The diagram below is the **back** of the CYD — the side with the ESP32 module,
 
 **Notes**
 
-- `S1` ties into the same rail the USB port delivers, so a regulated **5 V** source (USB charger, buck converter, BMS output) is the safe target. The on-board AMS1117 then derives 3.3 V for the ESP32 and display.
-- Do **not** feed 3.3 V into `S1` — the regulator's dropout means the ESP32 will brown out under load.
+- `S1` ties into the V+ rail shared with the USB port. A regulated **5 V** input (USB charger, buck converter, boost-equipped charging module) is the safe default and gives the on-board regulator full headroom for 3.3 V.
+- Do **not** feed more than **5 V** into `S1` — the on-board regulator is sized for the USB rail.
 - Powering via `S1`/`S3` and the USB port simultaneously is generally fine (USB has back-feed protection on most CYD revs), but unplug the bench supply before connecting USB to a PC just to be safe.
+
+## LiPo battery via a charging module
+
+Typical portable build: a single-cell LiPo (3.7 V nominal, 4.2 V fully charged, ~3.0 V cutoff) feeds a TP4056-style charger/protection module, whose `OUT+` / `OUT-` (or `B+` / `B-` on simpler modules) wire to the CYD's `S1` / `S3` pads.
+
+```
+   ┌──────────┐       ┌───────────────────────┐         CYD rear
+   │          │  B+   │   TP4056 charger /    │ OUT+
+   │  LiPo    ●───────┤   protection module   ├─────────►  S1
+   │  3.7 V   │       │                       │
+   │  cell    ●───────┤   (USB-C in for       ├─────────►  S3
+   │          │  B−   │    charging)          │ OUT−
+   └──────────┘       └───────────┬───────────┘
+                                  │
+                          USB-C (charging only)
+                          ▼
+                       wall adapter
+```
+
+**What to know with raw LiPo (no boost converter)**
+
+- Output to `S1` swings between **~4.2 V (full)** and **~3.0 V (cutoff)** — below the 5 V the USB port would supply. This works on many CYD revisions because the on-board LDO has low enough dropout to keep 3.3 V stable above ~3.6–3.7 V input, but **expect the display to dim, the WiFi radio to misbehave, or the device to reset as the cell drops past ~3.5 V**. Recharge before then.
+- If you want full runtime down to the LiPo cutoff (~3.0 V), add a small **5 V boost converter** (MT3608 etc.) between the charging module's `OUT` and the CYD's `S1`. That gives the on-board regulator constant 5 V regardless of cell state.
+- Always use a **protected** LiPo or a charging module with built-in over-discharge protection — bare cells run below 3.0 V degrade fast.
+- Don't connect the LiPo's USB-C-to-charge port and the CYD's USB port at the same time unless your charging module explicitly supports load-sharing; otherwise you can back-feed 5 V through the module into the cell.
 
 ## Other connectors (reference)
 
