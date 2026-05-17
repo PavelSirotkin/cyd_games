@@ -10,6 +10,8 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 - **Display:** 2.8" ILI9341 TFT, 320x240, resistive touchscreen (XPT2046)
 - **Extras:** RGB LED, passive piezo buzzer (GPIO 22), light sensor, SD card slot
 
+For an ASCII rear-view diagram and how to power the board via the **S1 / S3** solder pads (alternative to USB), see [Hardware: Power & Connections](docs/hardware-power.md).
+
 ## Games
 
 | Game / App | Players | Network | Description |
