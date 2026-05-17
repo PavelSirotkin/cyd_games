@@ -38,7 +38,7 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 - **NTP Clock** — Current date/time (Pacific) displayed on the main menu when WiFi is connected
 - **Sound Effects** — Piezo buzzer feedback for moves, opponent moves, wins, losses, and startup
 - **Persistent Settings** — Brightness, dark mode, sound, and device name saved to NVS across power cycles
-- **Settings Screen** — Device name editor, brightness slider, Dark Mode toggle, Sound on/off, WiFi on/off switch, IP, MAC, RSSI, firmware version, partition, heap, uptime, OTA URL
+- **Settings Screen** — Device name editor, brightness slider, Dark Mode toggle, Sound on/off, WiFi on/off switch, WiFi Setup (on-screen SSID/password entry), IP, MAC, RSSI, firmware version, partition, heap, uptime, OTA URL
 
 ## Build & Flash
 
@@ -77,13 +77,20 @@ http://<DEVICE_IP>/update
 
 ## WiFi Setup
 
-Create `include/secrets.h` (gitignored):
+Credentials are stored in NVS and can be entered directly on the device:
+
+- Open **Settings → WiFi Setup** to set the SSID and password using the on-screen keyboard. Use **Test** to attempt a connection and **Save** to persist (auto-reconnects).
+- On first boot with no credentials, the WiFi Setup screen launches automatically.
+
+Optionally, you can hard-code defaults at build time by creating `include/secrets.h` (gitignored):
 
 ```cpp
 #pragma once
 #define WIFI_SSID     "YourSSID"
 #define WIFI_PASSWORD "YourPassword"
 ```
+
+`secrets.h` is optional — if absent, the device falls back to NVS-stored credentials.
 
 If WiFi is unavailable or disabled in Settings, multiplayer automatically uses ESP-NOW instead.
 
