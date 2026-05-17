@@ -166,6 +166,7 @@ void Chess::init_pieces() {
     w_rook_a_moved_ = w_rook_h_moved_ = false;
     b_rook_a_moved_ = b_rook_h_moved_ = false;
     en_passant_sq_ = -1;
+    net_reset_sync();
 }
 
 lv_obj_t* Chess::create_board() {
@@ -214,6 +215,7 @@ lv_obj_t* Chess::create_board() {
     }
 
     lobby_list_ = nullptr;
+    flipped_ = (mode_ == MODE_NETWORK && !my_color_white_);
     init_pieces();
     draw_board();
     update_status();
@@ -225,7 +227,7 @@ void Chess::draw_board() {
 }
 
 void Chess::draw_piece(int idx) {
-    lv_obj_t* lbl = piece_labels_[idx];
+    lv_obj_t* lbl = piece_labels_[vidx(idx)];
     if (!lbl) return;
     lv_label_set_text(lbl, piece_sym(board_[idx]));
     if (board_[idx] > 0) {
@@ -246,7 +248,7 @@ void Chess::clear_highlights() {
 
 void Chess::highlight_cell(int idx, lv_color_t color) {
     // Used for selected piece — fill the cell
-    lv_obj_set_style_bg_color(cell_objs_[idx], color, 0);
+    lv_obj_set_style_bg_color(cell_objs_[vidx(idx)], color, 0);
 }
 
 static void outline_cell(lv_obj_t* cell, lv_color_t color) {
@@ -467,6 +469,7 @@ void Chess::cell_cb(lv_event_t* e) {
     int row = (p.y - ch_board_oy) / CELL;
     if (col < 0 || col >= 8 || row < 0 || row >= 8) return;
     int idx = row * 8 + col;
+    if (s_self->flipped_) idx = 63 - idx;
 
     bool is_my_piece = false;
     if (s_self->board_[idx] != NONE) {
@@ -489,7 +492,7 @@ void Chess::cell_cb(lv_event_t* e) {
             ? lv_color_hex(0xffffff) : lv_color_hex(0x111111);
         for (int t = 0; t < 64; t++) {
             if (s_self->is_valid_move(idx, t, true)) {
-                outline_cell(s_self->cell_objs_[t], hint_color);
+                outline_cell(s_self->cell_objs_[s_self->vidx(t)], hint_color);
             }
         }
         return;
@@ -600,16 +603,17 @@ void Chess::show_result(const char* text, bool is_win) {
 // ── Networking ──
 
 void Chess::send_move(int from, int to) {
-    StaticJsonDocument<128> doc;
+    net_mc_++;
+    StaticJsonDocument<160> doc;
     doc["type"] = "move"; doc["game"] = "chess";
     doc["from"] = from; doc["to"] = to;
-    char buf[128];
-    serializeJson(doc, buf, sizeof(buf));
-    discovery_send_game_data(peer_ip_, buf);
+    doc["mc"] = net_mc_;
+    serializeJson(doc, net_last_move_, sizeof(net_last_move_));
+    discovery_send_game_data(peer_ip_, net_last_move_);
 }
 
 void Chess::onNetworkData(const char* json) {
-    StaticJsonDocument<128> doc;
+    StaticJsonDocument<160> doc;
     if (deserializeJson(doc, json)) return;
     const char* g = doc["game"];
     if (!g || strcmp(g, "chess") != 0) return;
@@ -617,11 +621,23 @@ void Chess::onNetworkData(const char* json) {
         show_result("Opponent left", false);
         return;
     }
+
+    const char* action = doc["a"] | "";
+    uint32_t peer_mc = doc["mc"] | 0;
+    if (strcmp(action, "hb") == 0) {
+        if (peer_mc < net_mc_ && net_last_move_[0]) {
+            discovery_send_game_data(peer_ip_, net_last_move_);
+        }
+        return;
+    }
+    if (peer_mc != net_mc_ + 1) return;
+
     int from = doc["from"] | -1, to = doc["to"] | -1;
     if (from < 0 || to < 0) return;
 
     sound_opponent_move();
     do_move(from, to);
+    net_mc_ = peer_mc;
     clear_highlights();
     draw_board();
 
@@ -730,6 +746,17 @@ lv_obj_t* Chess::createScreen() {
 }
 
 void Chess::update() {
+    if (mode_ == MODE_NETWORK && !game_done_) {
+        if (millis() - net_last_hb_ms_ > NET_HB_INTERVAL_MS) {
+            net_last_hb_ms_ = millis();
+            char hb[80];
+            snprintf(hb, sizeof(hb),
+                "{\"type\":\"move\",\"game\":\"chess\",\"a\":\"hb\",\"mc\":%u}",
+                (unsigned)net_mc_);
+            discovery_send_game_data(peer_ip_, hb);
+        }
+    }
+
     if (mode_ == MODE_CPU && !white_turn_ && !game_done_) {
         if (!cpu_pending_) {
             cpu_pending_ = true;

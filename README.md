@@ -20,7 +20,7 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 | Connect 4 | 1-2P | Yes | vs CPU, local, or network, 4-direction win check |
 | Memory Match | 1-2P | Yes | Card matching with 6 pairs, solo/local/network |
 | Checkers | 1-2P | Yes | vs CPU, full rules with kings and forced jumps |
-| Chess | 1-2P | Yes | vs CPU, Unicode piece symbols, full rules |
+| Chess | 1-2P | Yes | vs CPU, Unicode piece symbols, full rules, board auto-flips so your pieces are always closest in network games |
 | Anagram | 1P | - | Unscramble words, 20s timer, 10 rounds, 80+ words |
 | Dots & Boxes | 2P | Yes | Claim boxes by completing lines |
 | Whack-a-Mole | 1P | - | Whack brown moles, spare baby faces, POW effects, 30s |
@@ -33,12 +33,12 @@ Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
 - **LVGL UI** — Dark-themed interface with animated screen transitions
 - **OTA Updates** — Custom web UI at `http://<IP>/update` showing device info, firmware version, and partition status
 - **Dual OTA Partitions** — app0/app1 alternating, with automatic rollback protection
-- **Network Multiplayer** — Works over WiFi (UDP) or ESP-NOW (no WiFi needed), invite/accept lobby system
+- **Network Multiplayer** — Works over WiFi (UDP) or ESP-NOW (no WiFi needed), invite/accept lobby system, heartbeat + move-counter resync auto-heals dropped moves in turn-based games
 - **ESP-NOW** — Peer-to-peer multiplayer without WiFi infrastructure, automatic fallback when WiFi is unavailable
 - **NTP Clock** — Current date/time (Pacific) displayed on the main menu when WiFi is connected
 - **Sound Effects** — Piezo buzzer feedback for moves, opponent moves, wins, losses, and startup
-- **Persistent Settings** — Brightness, display inversion, and device name saved to NVS across power cycles
-- **Settings Screen** — Device name editor, brightness slider, display inversion toggle, WiFi on/off switch, IP, MAC, RSSI, firmware version, partition, heap, uptime, OTA URL
+- **Persistent Settings** — Brightness, dark mode, sound, and device name saved to NVS across power cycles
+- **Settings Screen** — Device name editor, brightness slider, Dark Mode toggle, Sound on/off, WiFi on/off switch, IP, MAC, RSSI, firmware version, partition, heap, uptime, OTA URL
 
 ## Build & Flash
 
