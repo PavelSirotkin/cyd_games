@@ -1,14 +1,12 @@
 #include "display.h"
 #include "config.h"
+#include "cst820.h"
 #include <TFT_eSPI.h>
-#include <SPI.h>
-#include <XPT2046_Touchscreen.h>
 
 TFT_eSPI tft = TFT_eSPI();  // Non-static: accessible via extern from settings
 
-// XPT2046 on separate SPI bus (touch pins differ from display pins)
-static SPIClass touch_spi(VSPI);
-static XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
+// CST820 capacitive touch on I2C
+static CST820 touch(TOUCH_SDA, TOUCH_SCL, TOUCH_RST, TOUCH_INT);
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[SCREEN_WIDTH * LVGL_BUF_LINES];
@@ -34,13 +32,13 @@ static void disp_flush(lv_disp_drv_t* drv, const lv_area_t* area, lv_color_t* co
 }
 
 static void touch_read(lv_indev_drv_t* drv, lv_indev_data_t* data) {
-    if (ts.touched()) {
-        TS_Point p = ts.getPoint();
-        // Map raw touch coords to screen coords (landscape rotation 1)
+    uint16_t x, y;
+    if (touch.getTouch(&x, &y)) {
         data->state = LV_INDEV_STATE_PR;
-        data->point.x = map(p.x, TOUCH_CAL_X_MIN, TOUCH_CAL_X_MAX, 0, SCREEN_WIDTH - 1);
-        data->point.y = map(p.y, TOUCH_CAL_Y_MIN, TOUCH_CAL_Y_MAX, 0, SCREEN_HEIGHT - 1);
-
+        // CST820 returns coordinates in portrait mode, rotate to landscape
+        data->point.x = y;
+        data->point.y = SCREEN_HEIGHT - 1 - x;
+        
         // Clamp to screen bounds
         if (data->point.x < 0) data->point.x = 0;
         if (data->point.x >= SCREEN_WIDTH) data->point.x = SCREEN_WIDTH - 1;
@@ -57,10 +55,8 @@ void display_init() {
     tft.setRotation(1);  // Landscape 320x240
     tft.fillScreen(TFT_BLACK);
 
-    // Init touch on separate SPI bus
-    touch_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-    ts.begin(touch_spi);
-    ts.setRotation(1);  // Match display rotation
+    // Init CST820 capacitive touch
+    touch.begin();
 
     // Init LVGL
     lv_init();

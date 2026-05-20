@@ -1,4 +1,5 @@
 #include "ntp_time.h"
+#include "../hal/prefs.h"
 #include <time.h>
 #include <Arduino.h>
 
@@ -6,12 +7,25 @@ static bool time_valid = false;
 static char display_buf[20];
 
 void ntp_init() {
-    // Pacific Time: UTC-8 standard, UTC-7 daylight
-    // POSIX TZ string handles DST automatically
+    // Get saved timezone offset (-12 to +14)
+    int8_t tz_offset = prefs_get_timezone();
+    
+    // Configure NTP servers
     configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-    setenv("TZ", "PST8PDT,M3.2.0,M11.1.0", 1);
+    
+    // Build POSIX TZ string for the timezone
+    // Format: "UTC<offset>" where offset is inverted (UTC-3 becomes UTC+3 in POSIX)
+    char tz_str[16];
+    if (tz_offset >= 0) {
+        snprintf(tz_str, sizeof(tz_str), "UTC-%d", tz_offset);
+    } else {
+        snprintf(tz_str, sizeof(tz_str), "UTC+%d", -tz_offset);
+    }
+    
+    setenv("TZ", tz_str, 1);
     tzset();
-    Serial.println("[NTP] Time sync started (Pacific)");
+    
+    Serial.printf("[NTP] Time sync started (UTC%+d)\n", tz_offset);
 }
 
 bool ntp_valid() {

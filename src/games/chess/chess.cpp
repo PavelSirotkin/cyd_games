@@ -203,12 +203,19 @@ lv_obj_t* Chess::create_board() {
             lv_obj_set_style_bg_color(cell,
                 light ? lv_color_hex(0xeecea2) : lv_color_hex(0x8b6e4e), 0);
             lv_obj_set_style_bg_opa(cell, LV_OPA_COVER, 0);
+            // Pre-allocate the border style slots now (heap is available at
+            // creation) so highlight/outline never allocate during play.
+            lv_obj_set_style_border_color(cell, lv_color_hex(0xffffff), 0);
+            lv_obj_set_style_border_width(cell, 0, 0);
             lv_obj_clear_flag(cell, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
             cell_objs_[idx] = cell;
 
             lv_obj_t* lbl = lv_label_create(cell);
-            lv_label_set_text(lbl, "");
             lv_obj_set_style_text_font(lbl, &chess_symbols, 0);
+            // Pre-allocate the text-color slot for every label, incl. empty
+            // squares — draw_piece() must not allocate when a piece arrives.
+            lv_obj_set_style_text_color(lbl, lv_color_hex(0xffffff), 0);
+            lv_label_set_text_static(lbl, "");
             lv_obj_center(lbl);
             piece_labels_[idx] = lbl;
         }
@@ -229,7 +236,9 @@ void Chess::draw_board() {
 void Chess::draw_piece(int idx) {
     lv_obj_t* lbl = piece_labels_[vidx(idx)];
     if (!lbl) return;
-    lv_label_set_text(lbl, piece_sym(board_[idx]));
+    // text_static: piece_sym() returns static string literals, so the label
+    // never copies/reallocates a text buffer — zero heap use per move.
+    lv_label_set_text_static(lbl, piece_sym(board_[idx]));
     if (board_[idx] > 0) {
         lv_obj_set_style_text_color(lbl, lv_color_hex(0xffffff), 0);
     } else if (board_[idx] < 0) {
@@ -561,7 +570,8 @@ void Chess::update_status() {
     if (!lbl_status_) return;
     if (game_done_) return;
     bool in_chk = is_in_check(white_turn_);
-    char buf[32];
+    // Static buffer + set_text_static: status updates never touch the heap.
+    static char buf[32];
     if (mode_ == MODE_CPU) {
         snprintf(buf, sizeof(buf), "%s%s", white_turn_ ? "Your turn" : "CPU...",
                  in_chk ? " CHECK" : "");
@@ -572,7 +582,7 @@ void Chess::update_status() {
         snprintf(buf, sizeof(buf), "%s%s", my_turn_ ? "Your turn" : "Waiting...",
                  in_chk ? " CHECK" : "");
     }
-    lv_label_set_text(lbl_status_, buf);
+    lv_label_set_text_static(lbl_status_, buf);
 }
 
 void Chess::show_result(const char* text, bool is_win) {

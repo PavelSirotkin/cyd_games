@@ -68,3 +68,11 @@ void prefs_set_wifi_pass(const char* pass) {
 bool prefs_wifi_configured() {
     return nvs.getString("wifi_ssid", "").length() > 0;
 }
+
+int8_t prefs_get_timezone() {
+    return nvs.getChar("tz", 3);  // default UTC+3 (Moscow)
+}
+
+void prefs_set_timezone(int8_t tz) {
+    nvs.putChar("tz", tz);
+}

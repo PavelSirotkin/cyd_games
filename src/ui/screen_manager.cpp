@@ -13,11 +13,13 @@
 #include "../games/anagram/anagram.h"
 #include "../games/whack_mole/whack_mole.h"
 #include "../games/cup_pong/cup_pong.h"
-#include "../games/sudoku/sudoku.h"
+#include "../games/game15/game15.h"
 #include "../games/pictionary/pictionary.h"
 
 static ScreenDef screens[SCREEN_COUNT];
 static ScreenID  current_screen = SCREEN_MENU;
+static ScreenID  pending_switch = SCREEN_COUNT;  // SCREEN_COUNT = "no switch queued"
+static ScreenFactoryFn pending_factory = nullptr;
 
 // Static game instances (avoid heap fragmentation)
 static Battleship  battleship_game;
@@ -31,7 +33,7 @@ static Chess       chess_game;
 static Anagram     anagram_game;
 static WhackMole   whack_mole_game;
 static CupPong     cup_pong_game;
-static Sudoku      sudoku_game;
+static Game15      game15_game;
 static Pictionary  pictionary_game;
 
 void screen_manager_init() {
@@ -117,12 +119,12 @@ void screen_manager_init() {
         []() { cup_pong_game.destroy(); },
         true, cup_pong_game.maxPlayers()
     };
-    screens[SCREEN_SUDOKU] = {
-        sudoku_game.name(),
-        []() -> lv_obj_t* { return sudoku_game.createScreen(); },
-        []() { sudoku_game.update(); },
-        []() { sudoku_game.destroy(); },
-        true, sudoku_game.maxPlayers()
+    screens[SCREEN_GAME15] = {
+        game15_game.name(),
+        []() -> lv_obj_t* { return game15_game.createScreen(); },
+        []() { game15_game.update(); },
+        []() { game15_game.destroy(); },
+        true, game15_game.maxPlayers()
     };
     screens[SCREEN_PICTIONARY] = {
         pictionary_game.name(),
@@ -133,17 +135,67 @@ void screen_manager_init() {
     };
 }
 
-void screen_manager_switch(ScreenID id) {
+// Performs the real switch. Must run from the main loop (screen_manager_update),
+// never directly from an LVGL event callback: it frees the outgoing screen,
+// which may be the very screen whose button triggered the switch.
+static void perform_switch(ScreenID id) {
     if (screens[current_screen].destroy) {
         screens[current_screen].destroy();
     }
 
+    // Park the display on a tiny placeholder so the outgoing screen can be
+    // freed BEFORE the incoming one is allocated. The large 64-cell boards
+    // (chess/checkers) would otherwise coexist with the new screen and
+    // exhaust the LVGL heap (LV_ASSERT_MALLOC -> freeze).
+    lv_obj_t* old_scr = lv_scr_act();
+    lv_obj_t* placeholder = lv_obj_create(NULL);
+    lv_scr_load(placeholder);
+    if (old_scr) lv_obj_del(old_scr);
+
     lv_obj_t* scr = screens[id].create();
+    // auto_del=true deletes the placeholder once the animation finishes.
     lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, true);
     current_screen = id;
 }
 
+void screen_manager_switch(ScreenID id) {
+    // Defer to the main loop — see perform_switch().
+    pending_switch = id;
+}
+
+// Frees the outgoing screen, then builds the incoming one via `factory()`.
+// Same placeholder dance as perform_switch(), but does NOT call any game's
+// destroy() — this is for in-game screen swaps where game state persists.
+static void perform_factory_swap() {
+    ScreenFactoryFn f = pending_factory;
+    pending_factory = nullptr;
+    if (!f) return;
+
+    lv_obj_t* old_scr = lv_scr_act();
+    lv_obj_t* placeholder = lv_obj_create(NULL);
+    lv_scr_load(placeholder);
+    if (old_scr) lv_obj_del(old_scr);
+
+    lv_obj_t* scr = f();
+    if (scr) {
+        lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
+    }
+}
+
+void screen_manager_swap_to(ScreenFactoryFn factory) {
+    pending_factory = factory;
+}
+
 void screen_manager_update() {
+    if (pending_switch != SCREEN_COUNT) {
+        ScreenID id = pending_switch;
+        pending_switch = SCREEN_COUNT;
+        perform_switch(id);
+    }
+    if (pending_factory) {
+        perform_factory_swap();
+    }
+
     if (screens[current_screen].update) {
         screens[current_screen].update();
     }

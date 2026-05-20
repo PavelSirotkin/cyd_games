@@ -7,6 +7,7 @@
 #include "../hal/sound.h"
 #include "../net/wifi_manager.h"
 #include "../net/discovery.h"
+#include "../net/ntp_time.h"
 #include <WiFi.h>
 #include <Arduino.h>
 #include <esp_ota_ops.h>
@@ -334,6 +335,84 @@ lv_obj_t* screen_settings_create() {
     lv_obj_set_pos(btn_wcfg, 110, 2);
     lv_obj_add_event_cb(btn_wcfg, [](lv_event_t*) {
         screen_manager_switch(SCREEN_WIFI);
+    }, LV_EVENT_CLICKED, NULL);
+
+    // ── Timezone selector ──
+    lv_obj_t* tz_row = lv_obj_create(cont);
+    lv_obj_remove_style_all(tz_row);
+    lv_obj_set_size(tz_row, 300, 30);
+    lv_obj_clear_flag(tz_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t* tz_label = lv_label_create(tz_row);
+    lv_label_set_text(tz_label, "Timezone");
+    lv_obj_set_style_text_color(tz_label, UI_COLOR_DIM, 0);
+    lv_obj_set_style_text_font(tz_label, &lv_font_montserrat_12, 0);
+    lv_obj_set_pos(tz_label, 0, 6);
+
+    // Display current timezone
+    int8_t current_tz = prefs_get_timezone();
+    char tz_buf[24];
+    if (current_tz == 0) {
+        snprintf(tz_buf, sizeof(tz_buf), "UTC+0");
+    } else if (current_tz > 0) {
+        snprintf(tz_buf, sizeof(tz_buf), "UTC+%d", current_tz);
+    } else {
+        snprintf(tz_buf, sizeof(tz_buf), "UTC%d", current_tz);
+    }
+    
+    lv_obj_t* lbl_tz_val = lv_label_create(tz_row);
+    lv_label_set_text(lbl_tz_val, tz_buf);
+    lv_obj_set_style_text_color(lbl_tz_val, UI_COLOR_TEXT, 0);
+    lv_obj_set_style_text_font(lbl_tz_val, &lv_font_montserrat_12, 0);
+    lv_obj_set_pos(lbl_tz_val, 85, 6);
+
+    // Buttons to change timezone
+    lv_obj_t* btn_tz_minus = ui_create_btn(tz_row, "-", 30, 26);
+    lv_obj_set_pos(btn_tz_minus, 160, 2);
+    lv_obj_add_event_cb(btn_tz_minus, [](lv_event_t* e) {
+        int8_t tz = prefs_get_timezone();
+        if (tz > -12) {
+            tz--;
+            prefs_set_timezone(tz);
+            ntp_init();
+            
+            // Update label
+            lv_obj_t* row = lv_obj_get_parent(lv_event_get_target(e));
+            lv_obj_t* lbl = lv_obj_get_child(row, 1);
+            char buf[24];
+            if (tz == 0) {
+                snprintf(buf, sizeof(buf), "UTC+0");
+            } else if (tz > 0) {
+                snprintf(buf, sizeof(buf), "UTC+%d", tz);
+            } else {
+                snprintf(buf, sizeof(buf), "UTC%d", tz);
+            }
+            lv_label_set_text(lbl, buf);
+        }
+    }, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t* btn_tz_plus = ui_create_btn(tz_row, "+", 30, 26);
+    lv_obj_set_pos(btn_tz_plus, 195, 2);
+    lv_obj_add_event_cb(btn_tz_plus, [](lv_event_t* e) {
+        int8_t tz = prefs_get_timezone();
+        if (tz < 14) {
+            tz++;
+            prefs_set_timezone(tz);
+            ntp_init();
+            
+            // Update label
+            lv_obj_t* row = lv_obj_get_parent(lv_event_get_target(e));
+            lv_obj_t* lbl = lv_obj_get_child(row, 1);
+            char buf[24];
+            if (tz == 0) {
+                snprintf(buf, sizeof(buf), "UTC+0");
+            } else if (tz > 0) {
+                snprintf(buf, sizeof(buf), "UTC+%d", tz);
+            } else {
+                snprintf(buf, sizeof(buf), "UTC%d", tz);
+            }
+            lv_label_set_text(lbl, buf);
+        }
     }, LV_EVENT_CLICKED, NULL);
 
     // ── Info text ──

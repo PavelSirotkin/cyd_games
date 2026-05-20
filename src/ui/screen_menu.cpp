@@ -20,7 +20,7 @@ static const MenuItem items[] = {
     { LV_SYMBOL_LIST " Dots&Boxes",     SCREEN_DOTS_BOXES },
     { LV_SYMBOL_BELL " Whack-a-Mole",   SCREEN_WHACK_MOLE },
     { LV_SYMBOL_DOWNLOAD " Cup Pong",   SCREEN_CUP_PONG },
-    { LV_SYMBOL_NEW_LINE " Sudoku",    SCREEN_SUDOKU },
+    { LV_SYMBOL_NEW_LINE " 15 Puzzle",  SCREEN_GAME15 },
     { LV_SYMBOL_AUDIO " Pictionary", SCREEN_PICTIONARY },
     { LV_SYMBOL_SETTINGS " Settings",   SCREEN_SETTINGS },
 };

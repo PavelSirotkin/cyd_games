@@ -112,8 +112,8 @@ void espnow_init(uint8_t channel) {
         return;
     }
 
-    esp_now_register_recv_cb(on_recv);
-    esp_now_register_send_cb(on_send);
+    esp_now_register_recv_cb(esp_now_recv_cb_t(on_recv));
+    esp_now_register_send_cb(esp_now_send_cb_t(on_send));
 
     // Add broadcast peer
     esp_now_peer_info_t peer = {};

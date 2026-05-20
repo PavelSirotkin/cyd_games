@@ -697,28 +697,33 @@ void Battleship::done_place_cb(lv_event_t*) {
     s_self->selected_ship_ = -1;
     s_self->rebuild_board_from_ships(player);
 
+    // The battle screen has TWO 8x8 grids (~130 lv_obj) and would briefly
+    // coexist with the placement screen (~65 lv_obj) if we built it now —
+    // ~50 KB total, overflowing the LVGL heap and rebooting the device.
+    // Defer creation via screen_manager so the placement screen is freed
+    // first. Any state the factory lambda needs is set on s_self BEFORE
+    // queueing; the lambda runs in the next screen_manager_update tick.
     if (s_self->mode_ == MODE_LOCAL) {
         if (s_self->current_player_ == 0) {
             // P1 done, hand off to P2
             s_self->current_player_ = 1;
             s_self->place_ship_idx_ = 0;
             s_self->place_horiz_ = true;
-            lv_obj_t* scr = s_self->create_handoff(1);
-            lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
-            s_self->screen_ = scr;
         } else {
             // Both placed, start battle — P1 goes first
             s_self->current_player_ = 0;
-            lv_obj_t* scr = s_self->create_handoff(0);
-            lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
-            s_self->screen_ = scr;
         }
+        screen_manager_swap_to([]() -> lv_obj_t* {
+            s_self->screen_ = s_self->create_handoff(s_self->current_player_);
+            return s_self->screen_;
+        });
     } else if (s_self->mode_ == MODE_CPU) {
         // Start battle vs CPU
         s_self->my_turn_ = true;
-        lv_obj_t* scr = s_self->create_battle(0);
-        lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
-        s_self->screen_ = scr;
+        screen_manager_swap_to([]() -> lv_obj_t* {
+            s_self->screen_ = s_self->create_battle(0);
+            return s_self->screen_;
+        });
     } else if (s_self->mode_ == MODE_NETWORK) {
         // Send board to peer, wait for them or start battle
         StaticJsonDocument<128> doc;
@@ -732,21 +737,24 @@ void Battleship::done_place_cb(lv_event_t*) {
             // Opponent already ready
             s_self->my_turn_ = s_self->is_host_;
             s_self->phase_ = PHASE_BATTLE;
-            lv_obj_t* scr = s_self->create_battle(0);
-            lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
-            s_self->screen_ = scr;
+            screen_manager_swap_to([]() -> lv_obj_t* {
+                s_self->screen_ = s_self->create_battle(0);
+                return s_self->screen_;
+            });
         } else {
             // Wait for opponent
             s_self->phase_ = PHASE_WAIT;
-            lv_obj_t* scr = ui_create_screen();
-            lv_obj_t* lbl = lv_label_create(scr);
-            lv_label_set_text(lbl, "Waiting for opponent\nto place ships...");
-            lv_obj_set_style_text_color(lbl, UI_COLOR_DIM, 0);
-            lv_obj_set_style_text_font(lbl, &lv_font_montserrat_16, 0);
-            lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
-            lv_obj_center(lbl);
-            lv_scr_load_anim(scr, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, true);
-            s_self->screen_ = scr;
+            screen_manager_swap_to([]() -> lv_obj_t* {
+                lv_obj_t* scr = ui_create_screen();
+                lv_obj_t* lbl = lv_label_create(scr);
+                lv_label_set_text(lbl, "Waiting for opponent\nto place ships...");
+                lv_obj_set_style_text_color(lbl, UI_COLOR_DIM, 0);
+                lv_obj_set_style_text_font(lbl, &lv_font_montserrat_16, 0);
+                lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
+                lv_obj_center(lbl);
+                s_self->screen_ = scr;
+                return scr;
+            });
         }
     }
 }

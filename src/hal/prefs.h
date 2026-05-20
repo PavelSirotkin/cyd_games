@@ -20,3 +20,5 @@ void     prefs_set_wifi_ssid(const char* ssid);
 void     prefs_get_wifi_pass(char* buf, size_t len);
 void     prefs_set_wifi_pass(const char* pass);
 bool     prefs_wifi_configured();
+int8_t   prefs_get_timezone();  // returns timezone offset -12 to +14, default 0 (UTC)
+void     prefs_set_timezone(int8_t tz);

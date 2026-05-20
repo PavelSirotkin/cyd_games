@@ -9,7 +9,7 @@
 
 /* Memory */
 #define LV_MEM_CUSTOM       0
-#define LV_MEM_SIZE         (40U * 1024U)
+#define LV_MEM_SIZE         (64U * 1024U)
 
 /* Display refresh */
 #define LV_DISP_DEF_REFR_PERIOD  33  /* ~30fps */
@@ -19,12 +19,26 @@
 #define LV_USE_LOG           0
 
 /* Fonts */
+#define LV_FONT_MONTSERRAT_8   0
+#define LV_FONT_MONTSERRAT_10  0
 #define LV_FONT_MONTSERRAT_12  1
 #define LV_FONT_MONTSERRAT_14  1
 #define LV_FONT_MONTSERRAT_16  1
+#define LV_FONT_MONTSERRAT_18  0
 #define LV_FONT_MONTSERRAT_20  1
+#define LV_FONT_MONTSERRAT_22  0
+#define LV_FONT_MONTSERRAT_24  0
+#define LV_FONT_MONTSERRAT_26  0
 #define LV_FONT_MONTSERRAT_28  1
+#define LV_FONT_MONTSERRAT_30  0
+#define LV_FONT_MONTSERRAT_32  0
+#define LV_FONT_MONTSERRAT_34  0
 #define LV_FONT_MONTSERRAT_36  1
+#define LV_FONT_MONTSERRAT_38  0
+#define LV_FONT_MONTSERRAT_40  0
+#define LV_FONT_MONTSERRAT_42  0
+#define LV_FONT_MONTSERRAT_44  0
+#define LV_FONT_MONTSERRAT_46  0
 #define LV_FONT_MONTSERRAT_48  1
 #define LV_FONT_DEFAULT        &lv_font_montserrat_14
 
@@ -46,7 +60,7 @@
 #define LV_USE_BTNMATRIX  1
 #define LV_USE_CANVAS     0
 #define LV_USE_CHECKBOX   0
-#define LV_USE_DROPDOWN   0
+#define LV_USE_DROPDOWN   1
 #define LV_USE_IMG        1
 #define LV_USE_LABEL      1
 #define LV_USE_LINE       1

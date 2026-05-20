@@ -1,22 +1,15 @@
 #pragma once
 
-// ── Display (ILI9341 on HSPI) ──
-#define TFT_BL_PIN      21
+// ── Display (ST7789 - JC2432W328RC) ──
+#define TFT_BL_PIN      27
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
 
-// ── XPT2046 Touch (separate SPI from display) ──
-#define XPT2046_CS    33
-#define XPT2046_CLK   25
-#define XPT2046_MOSI  32
-#define XPT2046_MISO  39
-#define XPT2046_IRQ   36
-
-// ── Touch calibration (landscape rotation 1) ──
-#define TOUCH_CAL_X_MIN  200
-#define TOUCH_CAL_X_MAX  3700
-#define TOUCH_CAL_Y_MIN  240
-#define TOUCH_CAL_Y_MAX  3800
+// ── CST820 Touch (I2C capacitive) ──
+#define TOUCH_SDA       33
+#define TOUCH_SCL       32
+#define TOUCH_RST       25
+#define TOUCH_INT       21
 
 // ── RGB LED (active LOW) ──
 #define LED_R_PIN        4
@@ -39,4 +32,4 @@
 #define ESPNOW_CHANNEL    1
 
 // ── LVGL buffers ──
-#define LVGL_BUF_LINES   10
+#define LVGL_BUF_LINES   8

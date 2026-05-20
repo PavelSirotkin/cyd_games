@@ -178,6 +178,7 @@ lv_obj_t* weather_icon_create(lv_obj_t* parent, int size) {
 }
 
 void weather_icon_set_code(lv_obj_t* icon, int weather_code) {
+    if (!icon) return;
     lv_obj_set_user_data(icon, (void*)(intptr_t)weather_code);
     lv_obj_invalidate(icon);
 }

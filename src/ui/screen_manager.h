@@ -16,7 +16,7 @@ enum ScreenID {
     SCREEN_ANAGRAM,
     SCREEN_WHACK_MOLE,
     SCREEN_CUP_PONG,
-    SCREEN_SUDOKU,
+    SCREEN_GAME15,
     SCREEN_PICTIONARY,
     SCREEN_COUNT
 };
@@ -35,3 +35,12 @@ void     screen_manager_switch(ScreenID id);
 void     screen_manager_update();
 ScreenID screen_manager_current();
 void     screen_manager_back_to_menu();
+
+// Defer an in-game screen swap to the main loop. The factory function is
+// invoked AFTER the outgoing screen has been freed, so the new screen does
+// not have to coexist with the old one in the LVGL heap. Use this for any
+// internal transition between two memory-heavy screens (e.g. battleship
+// placement -> battle). The factory MUST be a non-capturing lambda /
+// plain function pointer.
+typedef lv_obj_t* (*ScreenFactoryFn)();
+void     screen_manager_swap_to(ScreenFactoryFn factory);
