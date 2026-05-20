@@ -1,63 +1,68 @@
 # CYD Arcade
 
-Multi-game touchscreen arcade machine for the ESP32-2432S028 (Cheap Yellow Display).
+Мультиигровая аркадная консоль с сенсорным экраном для ESP32-2432S028 (Cheap Yellow Display).
 
-Built with LVGL 8, TFT_eSPI, PlatformIO, and ElegantOTA.
+Собрана на LVGL 8, TFT_eSPI, PlatformIO и ElegantOTA.
 
-## Hardware
+## Аппаратное обеспечение
 
-- **Board:** ESP32-2432S028 (CYD) — ESP32-WROOM-32, 4MB flash
-- **Display:** 2.8" ILI9341 TFT, 320x240, resistive touchscreen (XPT2046)
-- **Extras:** RGB LED, passive piezo buzzer (GPIO 22), light sensor, SD card slot
+- **Плата:** ESP32-2432S028 (CYD) — ESP32-WROOM-32, 4MB flash
+- **Дисплей:** 2.8" ILI9341 TFT, 320x240, резистивный сенсорный экран (XPT2046 / CST820)
+- **Дополнительно:** RGB LED, пассивный пьезозуммер (GPIO 22), датчик освещения, слот для SD-карты
 
-For an ASCII rear-view diagram and how to power the board via the **S1 / S3** solder pads (alternative to USB), see [Hardware: Power & Connections](docs/hardware-power.md).
+> Поддержка сенсорных контроллеров **XPT2046** и **CST820** — определение модели происходит автоматически.
 
-## Games
+Схема подключения питания через контактные площадки **S1 / S3**: см. [Hardware: Power & Connections](docs/hardware-power.md).
 
-| Game / App | Players | Network | Description |
-|------------|---------|---------|-------------|
-| Battleship | 1-2P | Yes | 8x8 grid, drag/rotate ships, fire to sink fleet, vs CPU (hunt/target AI)/local/network |
-| Clock | - | - | Clock (with Islamic date), Timer, Stopwatch, Alarm, Seattle Weather (7-day forecast) |
-| Pong | 1-2P | Yes | Touch paddle, vs CPU or network, first to 10 |
-| Connect 4 | 1-2P | Yes | vs CPU, local, or network, 4-direction win check |
-| Memory Match | 1-2P | Yes | Card matching with 6 pairs, solo/local/network |
-| Checkers | 1-2P | Yes | vs CPU, full rules with kings and forced jumps |
-| Chess | 1-2P | Yes | vs CPU, Unicode piece symbols, full rules, board auto-flips so your pieces are always closest in network games |
-| Anagram | 1P | - | Unscramble words, 20s timer, 10 rounds, 80+ words |
-| Dots & Boxes | 2P | Yes | Claim boxes by completing lines |
-| Whack-a-Mole | 1P | - | Whack brown moles, spare baby faces, POW effects, 30s |
-| Cup Pong | 1P | - | Bounce ball off table into 10 red cups, 10 throws |
-| Sudoku | 1P | - | 9x9 puzzle, number pad, check box, Done validates with error highlights, elapsed timer |
-| Pictionary | 2P | Yes | Draw & guess, 6 colors, 30s timer, local or network with live drawing sync |
+## Игры и приложения
 
-## Features
+| Игра / Приложение | Игроков | Сеть | Описание |
+|-------------------|---------|------|----------|
+| Battleship (Морской бой) | 1-2P | Да | Поле 8x8, перетаскивание/поворот кораблей, vs CPU (hunt/target AI)/локально/по сети |
+| Clock (Часы) | — | — | Часы (с исламской датой), Таймер, Секундомер, Будильник, Погода Сиэтла (прогноз на 7 дней) |
+| Pong | 1-2P | Да | Ракетка касанием, vs CPU или по сети, до 10 очков |
+| Connect 4 (Четыре в ряд) | 1-2P | Да | vs CPU, локально или по сети, проверка по 4 направлениям |
+| Memory Match (Мемори) | 1-2P | Да | Поиск пар карт, 6 пар, соло/локально/по сети |
+| Checkers (Шашки) | 1-2P | Да | vs CPU, полные правила с дамками и обязательным взятием |
+| Chess (Шахматы) | 1-2P | Да | vs CPU, символы Unicode, полные правила, авто-поворот доски в сетевой игре |
+| Anagram (Анаграмма) | 1P | — | Собери слово, 20s таймер, 10 раундов, 80+ слов |
+| Dots & Boxes (Точки) | 2P | Да | Захвати квадраты, соединяя линии |
+| Whack-a-Mole (Кроты) | 1P | — | Бей коричневых кротов, не задень детей, POW-эффекты, 30s |
+| Cup Pong (Стаканчики) | 1P | — | Отскок мяча в 10 красных стаканчиков, 10 бросков |
+| Pictionary (Крокодил) | 2P | Да | Рисуй и угадывай, 6 цветов, 30s, локально или по сети с синхронизацией в реальном времени |
+| **Game15 (Пятнашки)** 🆕 | 1P | — | Классическая головоломка 4x4, перемешай и собери числа по порядку |
 
-- **LVGL UI** — Dark-themed interface with animated screen transitions
-- **OTA Updates** — Custom web UI at `http://<IP>/update` showing device info, firmware version, and partition status
-- **Dual OTA Partitions** — app0/app1 alternating, with automatic rollback protection
-- **Network Multiplayer** — Works over WiFi (UDP) or ESP-NOW (no WiFi needed), invite/accept lobby system, heartbeat + move-counter resync auto-heals dropped moves in turn-based games
-- **ESP-NOW** — Peer-to-peer multiplayer without WiFi infrastructure, automatic fallback when WiFi is unavailable
-- **NTP Clock** — Current date/time (Pacific) displayed on the main menu when WiFi is connected
-- **Sound Effects** — Piezo buzzer feedback for moves, opponent moves, wins, losses, and startup
-- **Persistent Settings** — Brightness, dark mode, sound, and device name saved to NVS across power cycles
-- **Settings Screen** — Device name editor, brightness slider, Dark Mode toggle, Sound on/off, WiFi on/off switch, WiFi Setup (on-screen SSID/password entry), IP, MAC, RSSI, firmware version, partition, heap, uptime, OTA URL
+> **Удалено:** Sudoku (судоку) — заменён на Game15.
 
-## Build & Flash
+## Возможности
 
-### PlatformIO (recommended)
+- **LVGL UI** — Тёмная тема с анимированными переходами между экранами
+- **OTA-обновления** — Веб-интерфейс по `http://<IP>/update` с информацией об устройстве, версии прошивки и статусе разделов
+- **Двойные OTA-разделы** — app0/app1 с автоматической защитой отката
+- **Сетевая игра** — Работает через WiFi (UDP) или ESP-NOW (без WiFi), система приглашений в лобби, heartbeat + сброс счётчика ходов для автоматического восстановления в пошаговых играх
+- **ESP-NOW** — Одноранговая игра без WiFi-инфраструктуры, до ~200 м
+- **NTP Часы** — Текущая дата/время (Pacific) на главном меню при подключении WiFi
+- **Звуковые эффекты** — Пьезозуммер: ходы, победы, поражения, запуск
+- **Постоянные настройки** — Яркость, тёмная тема, звук, имя устройства — сохраняются в NVS
+- **Экран настроек** — Редактор имени устройства, ползунок яркости, тёмная тема, звук вкл/выкл, WiFi вкл/выкл, WiFi Setup (ввод SSID/пароля на экране), IP, MAC, RSSI, версия прошивки, раздел, heap, uptime, OTA URL
+- **Поддержка CST820** 🆕 — Добавлен драйвер сенсорного контроллера CST820; модель определяется автоматически при загрузке наряду с XPT2046
+
+## Сборка и прошивка
+
+### PlatformIO (рекомендуется)
 
 ```bash
-# Build
+# Сборка
 pio run
 
-# Flash via USB
+# Прошивка через USB
 pio run -t upload
 
-# Serial monitor
+# Монитор порта
 pio device monitor
 ```
 
-### esptool (alternative)
+### esptool (альтернатива)
 
 ```bash
 esptool --chip esp32 --port /dev/cu.usbserial-110 write_flash \
@@ -67,24 +72,24 @@ esptool --chip esp32 --port /dev/cu.usbserial-110 write_flash \
   0x10000 .pio/build/esp32-2432S028/firmware.bin
 ```
 
-### OTA (over-the-air)
+### OTA (по воздуху)
 
 ```bash
-# CLI upload
+# Загрузка через CLI
 ./ota-upload.sh <DEVICE_IP>
 
-# Or open in browser
+# Или открыть в браузере
 http://<DEVICE_IP>/update
 ```
 
-## WiFi Setup
+## Настройка WiFi
 
-Credentials are stored in NVS and can be entered directly on the device:
+Учётные данные хранятся в NVS. Можно ввести их прямо на устройстве:
 
-- Open **Settings → WiFi Setup** to set the SSID and password using the on-screen keyboard. Use **Test** to attempt a connection and **Save** to persist (auto-reconnects).
-- On first boot with no credentials, the WiFi Setup screen launches automatically.
+- Откройте **Settings → WiFi Setup**, введите SSID и пароль экранной клавиатурой. Используйте **Test** для проверки подключения и **Save** для сохранения (автопереподключение).
+- При первом запуске без учётных данных экран WiFi Setup открывается автоматически.
 
-Optionally, you can hard-code defaults at build time by creating `include/secrets.h` (gitignored):
+Для жёсткой фиксации при сборке создайте `include/secrets.h` (в .gitignore):
 
 ```cpp
 #pragma once
@@ -92,56 +97,70 @@ Optionally, you can hard-code defaults at build time by creating `include/secret
 #define WIFI_PASSWORD "YourPassword"
 ```
 
-`secrets.h` is optional — if absent, the device falls back to NVS-stored credentials.
+`secrets.h` опционален — если отсутствует, устройство использует учётные данные из NVS.
 
-If WiFi is unavailable or disabled in Settings, multiplayer automatically uses ESP-NOW instead.
+Если WiFi недоступен или отключён в настройках, сетевая игра автоматически переключается на ESP-NOW.
 
-## Project Structure
+## Структура проекта
 
 ```
-├── platformio.ini          # Build config, TFT_eSPI pins, library deps
-├── partitions.csv          # Dual OTA partition layout
-├── lv_conf.h               # LVGL configuration
-├── ota-upload.sh           # CLI OTA upload script
+├── platformio.ini          # Конфигурация сборки, пины TFT_eSPI, зависимости
+├── partitions.csv          # Разметка разделов для двойной OTA
+├── lv_conf.h               # Конфигурация LVGL
+├── ota-upload.sh           # CLI-скрипт OTA-загрузки
 ├── include/
-│   ├── config.h            # Pin definitions and constants
-│   └── secrets.h           # WiFi credentials (gitignored)
+│   ├── config.h            # Определения пинов и констант
+│   └── secrets.h           # WiFi-учётные данные (gitignored)
 ├── src/
-│   ├── main.cpp            # Setup/loop orchestration
-│   ├── hal/                # Display, backlight, LED, audio, sound effects, preferences
-│   ├── net/                # WiFi, OTA, UDP/ESP-NOW discovery
-│   ├── ui/                 # Screen manager, menu, settings, shared styles
-│   ├── apps/               # Clock (Timer, Stopwatch, Alarm)
-│   ├── utils/              # Global alert state and overlay system
+│   ├── main.cpp            # Оркестрация setup/loop
+│   ├── hal/                # Дисплей, подсветка, LED, аудио, звуковые эффекты, предпочтения
+│   │   ├── cst820.cpp/h   🆕  # Драйвер сенсорного контроллера CST820
+│   ├── net/                # WiFi, OTA, обнаружение UDP/ESP-NOW
+│   ├── ui/                 # Менеджер экранов, меню, настройки, общие стили
+│   ├── apps/               # Часы (Таймер, Секундомер, Будильник)
+│   ├── utils/              # Глобальное состояние и система уведомлений
 │   └── games/              # Battleship, Memory, Pong, Connect 4,
 │                           # Checkers, Chess, Anagram, Dots & Boxes,
-│                           # Whack-a-Mole, Cup Pong, Sudoku, Pictionary
+│                           # Whack-a-Mole, Cup Pong, Pictionary,
+│                           # Game15 (Пятнашки) 🆕
 ```
 
-## Multiplayer
+## Сетевая игра
 
-Two-player games support two transport modes:
+Двухпользовательские игры поддерживают два режима передачи:
 
-- **WiFi (UDP)** — Broadcast discovery on the local network (port 4328)
-- **ESP-NOW** — Direct peer-to-peer, no WiFi network needed, ~200m range
+- **WiFi (UDP)** — Широковещательное обнаружение в локальной сети (порт 4328)
+- **ESP-NOW** — Прямая связь между устройствами без WiFi, ~200 м
 
-The transport is selected automatically at boot based on WiFi connectivity, or manually via the WiFi toggle in Settings.
+Режим выбирается автоматически при загрузке в зависимости от наличия WiFi, либо вручную переключателем в настройках.
 
-### How to play
+### Как играть
 
-1. Both devices select "Network" from the game menu
-2. Peers appear in the lobby list within seconds
-3. Tap a peer to send an invite
-4. Other device sees an Accept/Decline popup
-5. Game starts once invite is accepted
+1. Оба устройства выбирают «Network» в меню игры
+2. Устройства появляются в списке лобби в течение нескольких секунд
+3. Нажмите на устройство, чтобы отправить приглашение
+4. На втором устройстве появится окно «Принять/Отклонить»
+5. Игра начнётся после принятия приглашения
 
-Each game syncs state independently — turn-based games send moves, Pong syncs ball/paddle positions at 20fps, Memory Match syncs the card layout and flips.
+Каждая игра синхронизирует состояние независимо. Пошаговые игры передают ходы, Pong синхронизирует позиции мяча/ракеток на 20fps, Memory Match — расположение и перевороты карт.
 
-For technical details, see the design documents:
-- **[ESP-NOW Transport Design](docs/esp-now-transport.md)** — Transport layer, discovery protocol, peer management, packet formats
-- **[Game Network Sync Design](docs/game-network-sync.md)** — Per-game sync patterns, JSON message formats, reliability strategies
-- **[LVGL + ESP32 Lessons Learned](docs/lvgl-esp32-lessons.md)** — Custom fonts, text rendering, touch handling, layout, scrolling, drawing, ArduinoJson gotchas
+Технические детали:
+- **[ESP-NOW Transport Design](docs/esp-now-transport.md)** — транспортный уровень, протокол обнаружения, управление пирами, форматы пакетов
+- **[Game Network Sync Design](docs/game-network-sync.md)** — паттерны синхронизации, форматы JSON, стратегии надёжности
+- **[LVGL + ESP32 Lessons Learned](docs/lvgl-esp32-lessons.md)** — шрифты, рендеринг текста, сенсорный ввод, компоновка, скроллинг, рисование, нюансы ArduinoJson
 
-### Device name
+### Имя устройства
 
-Set a custom device name in Settings (persisted across reboots). This name appears in lobby lists and invite dialogs instead of the default MAC-based `CYD-XXYY`.
+Установите имя в настройках (сохраняется в NVS). Оно отображается в списке лобби и диалогах приглашений вместо MAC-имени `CYD-XXYY`.
+
+---
+
+## История изменений
+
+### Текущая версия
+- **Добавлена игра «Пятнашки» (Game15)** — классическая головоломка 4×4
+- **Удалена игра «Судоку»** — заменена на Game15
+- **Добавлена поддержка CST820** — драйвер сенсорного контроллера CST820; автоматическое определение модели при загрузке
+- **Переработано приложение Clock** — упрощена структура кода
+- **Обновлён экран настроек** — добавлены новые опции
+- **Обновлён менеджер экранов** — изменена логика навигации
